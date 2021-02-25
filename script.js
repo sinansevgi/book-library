@@ -1,23 +1,15 @@
 const books = [];
-function Book(title, author, pages, readStatus) {
-  this.title = title;
-  this.author = author;
-  this.pages = pages;
-  this.readStatus = readStatus;
-}
-
-Book.prototype.changeStatus = function () {
-  this.readStatus = !(this.readStatus);
+const Book = (title, author, pages, readStatus) =>
+{
+  const getTitle = () => title;
+  const getAuthor = () => author;
+  const getPages = () =>  pages;
+  const getReadStatus = () => {return (readStatus ? 'Book Read' : 'Unread');};
+  const changeStatus = () => {
+    readStatus = !(readStatus);
+  };
+  return {getTitle, getAuthor, getPages, getReadStatus, changeStatus}
 };
-
-let storageItems = window.localStorage.getItem('books');
-storageItems = JSON.parse(storageItems);
-if (storageItems) {
-  storageItems.forEach(book => {
-    const newBook = new Book(book.title, book.author, book.readStatus, book.readStatus);
-    books.push(newBook);
-  });
-}
 
 function elementAttributes(element, id, name, type, placeholder = '') {
   element.setAttribute('id', id);
@@ -49,27 +41,18 @@ function createForm() {
   const table = document.getElementById('table');
   table.appendChild(form);
 }
-
-function stringifyReadStatus(readStatus) {
-  if (readStatus) {
-    return 'Book Read';
-  }
-
-  return 'Unread';
-}
-
 function displayBook(book) {
   const tableRow = document.createElement('tr');
   tableRow.setAttribute('id', `book-${books.indexOf(book)}`);
   const bookTitle = document.createElement('td');
-  bookTitle.textContent = book.title;
+  bookTitle.textContent = book.getTitle();
   const bookAuthor = document.createElement('td');
-  bookAuthor.textContent = book.author;
+  bookAuthor.textContent = book.getAuthor();
   const bookPages = document.createElement('td');
-  bookPages.textContent = book.pages;
+  bookPages.textContent = book.getPages();
   const readStatus = document.createElement('td');
   readStatus.setAttribute('id', `status${books.indexOf(book)}`);
-  readStatus.textContent = stringifyReadStatus(book.readStatus);
+  readStatus.textContent = book.getReadStatus();
   const buttonTd = document.createElement('td');
   const buttonContainer = document.createElement('div');
   const readButton = document.createElement('button');
@@ -82,14 +65,12 @@ function displayBook(book) {
   removeButton.addEventListener('click', () => {
     books.splice(Number(removeButton.getAttribute('data-attribute')), 1);
     removeButton.parentNode.parentNode.parentNode.remove();
-    const stringifyBooks = JSON.stringify(books);
-    window.localStorage.setItem('books', stringifyBooks);
   });
 
   readButton.addEventListener('click', () => {
     const statusField = document.getElementById(`status${removeButton.getAttribute('data-attribute')}`);
     book.changeStatus();
-    statusField.textContent = stringifyReadStatus(book.readStatus);
+    statusField.textContent = book.getReadStatus();
   });
 
   buttonContainer.appendChild(readButton);
@@ -118,13 +99,11 @@ function createBook() {
   const inputAuthor = document.getElementById('author');
   const inputPages = document.getElementById('pages');
   const inputReadStatus = document.getElementById('read');
-  const newBook = new Book(inputTitle.value,
+  const newBook = Book(inputTitle.value,
     inputAuthor.value,
     inputPages.value,
     inputReadStatus.checked);
   books.push(newBook);
-  const stringifyBooks = JSON.stringify(books);
-  window.localStorage.setItem('books', stringifyBooks);
 }
 
 function destroyForm() {
